@@ -14,7 +14,6 @@ export const ImageGalleryItem = ({smallImg, bigImg, tag}: IImageGalleryItem) => 
   const[showModal, setShowModal] = useState(false)
 
     const toggleModal = () => {
-      console.log('dsdsdsd')
       setShowModal(!showModal);
     };
 
@@ -30,7 +29,7 @@ export const ImageGalleryItem = ({smallImg, bigImg, tag}: IImageGalleryItem) => 
                 <img src={smallImg} alt={tag} onClick={toggleModal}/>
             </ImageGalleryLi>
             {showModal && <Modal
-              // showModal={toggleModal}
+              showModal={toggleModal}
               closeModalOnBackdrop={closeModalOnBackdrop}
               bigImg={bigImg}
               tag={tag}
