@@ -8,6 +8,8 @@ import {Button} from '../Button/Button';
 
 interface IImageGallery {
     searchValue: string,
+    pageCounter: number,
+    setPageCounter: (value: number)=>void
 }
 
 interface IResponse {
@@ -15,19 +17,25 @@ interface IResponse {
     totalHits: number
 }
 
-export const ImageGallery = ({searchValue}: IImageGallery) => {
+export const ImageGallery = ({searchValue, pageCounter, setPageCounter}: IImageGallery) => {
 
     const [images, setImages] = useState([])
     const [totalHits, setTotalHits] = useState(0)
-    const [pageCounter, setPageCounter] = useState(1)
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState('')
 
-    const initialRender = useRef(false);
+
+    useEffect(()=>{
+        if(searchValue !== '') {
+            if (totalHits === images.length ) {
+                return Notiflix.Notify.failure(`We're sorry, but you've reached the end of search results.`);
+            } return
+        }
+    },[images.length])
 
     useEffect(() => {
-        if (initialRender.current) {
+        if(searchValue !== '') {
         setIsLoading(true);
-        setPageCounter(1);
         const fetchData = async () => {
             try {
                 const response = await getImages(searchValue, pageCounter);
@@ -36,37 +44,13 @@ export const ImageGallery = ({searchValue}: IImageGallery) => {
                     setImages([]);
                     return Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
                 }
-                Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
-                setImages(hits)
-                setTotalHits(totalHits)
-            } catch (e) {
-                console.log(e)
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchData()
-        }
-        else {
-            initialRender.current = true
-        }
-    }, [searchValue])
-
-
-    useEffect(() => {
-        if (initialRender.current) {
-        setIsLoading(true);
-        const fetchData = async () => {
-            try {
-                const response = await getImages(searchValue, pageCounter);
-                const {hits, totalHits}:IResponse = response.data;
-                setImages([...images, ...hits])
-                console.log(totalHits)
-                console.log(images.length)
-                if (totalHits === images.length) {
-                    return Notiflix.Notify.failure(`We're sorry, but you've reached the end of search results.`);
+                if (pageCounter === 1){
+                    Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+                    setImages(hits)
+                    setTotalHits(totalHits)
+                } else {
+                    setImages([...images, ...hits])
                 }
-
             } catch (e) {
                 console.log(e)
             } finally {
@@ -74,11 +58,8 @@ export const ImageGallery = ({searchValue}: IImageGallery) => {
             }
         }
         fetchData()
-        }
-        else {
-            initialRender.current = true
-        }
-    }, [pageCounter])
+        } return
+    }, [searchValue, pageCounter])
 
     const loadMoreHandler = () => {
         setPageCounter(pageCounter + 1);
